@@ -1,4 +1,6 @@
 "use client";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LuClipboard } from "react-icons/lu";
 import { LuClipboardCheck } from "react-icons/lu";
@@ -7,35 +9,46 @@ import Typed from "typed.js";
 export default function Home() {
   const [roomName, setRoomName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [generatedLink, setGeneratedLink] = useState("");
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const el = useRef<HTMLParagraphElement | null>(null);
   useEffect(() => {
     const typed = new Typed(el.current, {
-      strings: ["Welcome to Anonymous"],
+      strings: ["Welcome To Anonymous"],
       typeSpeed: 50,
     });
 
     return () => typed.destroy();
   }, []);
 
-  const generateLink = () => {
+  const generateLink = async () => {
     if (roomName.trim() === "") return;
-    const link = `https://chatroom.example.com/${Math.random()
-      .toString(36)
-      .substring(7)}`;
-    setGeneratedLink(link);
+
+    try {
+      setIsLoading(true);
+      const id = Math.random().toString(36).substring(7);
+
+      await createClient().from("room").insert({ id, name: roomName });
+
+      const link = `https://anonymous.vercel.app/${id}`;
+      setGeneratedLink(link);
+    } catch (error: any) {
+      console.log(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedLink);
+    navigator.clipboard.writeText(generatedLink!);
     setIsCopied(true);
   };
 
   return (
     <div className="flex flex-col min-h-screen justify-center items-center">
-      <p className="text-4xl font-bold" ref={el} />
+      <p className="text-4xl lg:text-5xl xl:text-7xl font-bold" ref={el} />
 
       <button
         className="btn mt-6 bg-primary hover:bg-accent text-white "
@@ -71,14 +84,18 @@ export default function Home() {
                   className="btn mt-6 bg-primary w-full hover:bg-accent text-white"
                   onClick={generateLink}
                 >
-                  Generate Link
+                  {isLoading ? (
+                    <span className="loading loading-spinner loading-md" />
+                  ) : (
+                    "Generate Link"
+                  )}
                 </button>
 
-                {generatedLink && (
+                {!isLoading && generatedLink ? (
                   <div className="mt-6 flex items-center justify-self-end h-full">
-                    <p className="h-12 border rounded-md flex items-center justify-center px-2 w-full font-semibold">
+                    <Link href={generatedLink} className="h-12 border rounded-md flex items-center justify-center px-2 w-full font-semibold">
                       {generatedLink}
-                    </p>
+                    </Link>
                     <button
                       className="btn ml-2 bg-accent hover:bg-primary text-white"
                       onClick={copyToClipboard}
@@ -86,7 +103,7 @@ export default function Home() {
                       {isCopied ? <LuClipboardCheck /> : <LuClipboard />}
                     </button>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
