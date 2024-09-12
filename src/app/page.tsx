@@ -32,7 +32,7 @@ export default function Home() {
 
       await createClient().from("room").insert({ id, name: roomName });
 
-      const link = `http://localhost:3001/chatrooms/${id}`;
+      const link = `https://anonymus-chi.vercel.app/chatrooms/${id}`;
       setGeneratedLink(link);
     } catch (error: any) {
       console.log(error.message);
