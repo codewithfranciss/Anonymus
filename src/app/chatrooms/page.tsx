@@ -1,7 +1,10 @@
+import { BiPencil, BiSend, BiTrash } from "react-icons/bi";
+import { TbLink } from "react-icons/tb";
+
 export default function Chatroom() {
   return (
-    <div className="max-w-md mx-auto rounded-lg">
-      <div className="chat-container border-secondary h-screen p-4 flex flex-col justify-between">
+    <div className="max-w-2xl mx-auto">
+      <div className="chat-container h-screen p-4 flex flex-col justify-between">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="p-2 font-black text-lg">Coding Group</h2>
@@ -27,16 +30,16 @@ export default function Chatroom() {
             </button>
             <ul
               tabIndex={0}
-              className="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-52"
+              className="dropdown-content z-10 menu p-2 shadow-md bg-secondary rounded-box w-52"
             >
               <li>
-                <a>Option 1</a>
+                <a><TbLink/>Share</a>
               </li>
               <li>
-                <a>Option 2</a>
+                <a><BiPencil/>Rename</a>
               </li>
               <li>
-                <a>Option 3</a>
+                <a><BiTrash/>Delete</a>
               </li>
             </ul>
           </div>
@@ -78,31 +81,16 @@ export default function Chatroom() {
             <div className="chat-footer opacity-50">Seen at 12:46</div>
           </div>
         </div>
-        <form action="">
-          <div className="flex items-center border-t border-gray-300 pt-4">
+        <div className="flex items-center border-t border-gray-300 pt-4">
             <input
               type="text"
               placeholder="Type your message here"
               className="input input-bordered flex-grow bg-secondary focus:outline-none"
             />
             <button className="btn bg-primary ml-2 hover:bg-accent text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M14.752 11.168l-9.193-3.672A1 1 0 005 8.268v7.464a1 1 0 001.559.829l9.193-5.772a1 1 0 000-1.658z"
-                />
-              </svg>
+          <BiSend/>
             </button>
           </div>
-        </form>
       </div>
     </div>
   );
