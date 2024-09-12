@@ -3,9 +3,9 @@ import { TbLink } from "react-icons/tb";
 
 export default function Chatroom() {
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="chat-container h-screen p-4 flex flex-col justify-between">
-        {/* Header */}
+    <div className="relative max-w-2xl mx-auto h-[100dvh]">
+      <div className="chat-container p-4 flex flex-col justify-between">
+  
         <div className="flex justify-between items-center mb-4">
           <h2 className="p-2 font-black text-lg">Coding Group</h2>
           <div className="dropdown dropdown-end">
@@ -81,7 +81,9 @@ export default function Chatroom() {
             <div className="chat-footer opacity-50">Seen at 12:46</div>
           </div>
         </div>
-        <div className="flex items-center border-t border-gray-300 pt-4">
+        
+      </div>
+      <div className="flex items-center border-t border-gray-300 pt-4 px-2 absolute bottom-2 w-full">
             <input
               type="text"
               placeholder="Type your message here"
@@ -91,7 +93,6 @@ export default function Chatroom() {
           <BiSend/>
             </button>
           </div>
-      </div>
     </div>
   );
 }
