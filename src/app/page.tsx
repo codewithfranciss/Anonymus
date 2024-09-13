@@ -93,7 +93,7 @@ export default function Home() {
 
                 {!isLoading && generatedLink ? (
                   <div className="mt-6 flex items-center justify-self-end h-full">
-                    <Link href={generatedLink} className="h-12 border rounded-md flex items-center justify-center px-2 w-full font-semibold">
+                    <Link href={generatedLink} target="_blank" className="h-12 border rounded-md flex items-center justify-center px-2 w-full font-semibold">
                       {generatedLink}
                     </Link>
                     <button
