@@ -1,54 +1,98 @@
 'use client'
 
 import { createClient } from "@/utils/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BiPencil, BiSend, BiTrash } from "react-icons/bi";
 import { TbLink } from "react-icons/tb";
 
-
-function Room({ name }: { name: string }) {
-
+function Room({ name, id }: { name: string, id: string }) {
   const [username, setUsername] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(() => {
+  const [isModalOpen, setIsModalOpen] = useState(true); 
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    if (storedUser) {
+      setUsername(storedUser);
+    }
+
+    const supabase = createClient();
     
-    const existingUser = localStorage.getItem("username")
-    console.log(existingUser)
-    if(!existingUser){
-        return true
+    // Fetch initial messages
+    fetchMessages(supabase);
+
+    // Poll for new messages
+    const interval = setInterval(() => {
+      fetchMessages(supabase);
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [id]);
+
+  const generatedUsername = async () => {
+    if (username.trim() === "") return;
+
+    try {
+      setIsLoading(true);
       
-      } else {
-        return false
-      }
-    });
-  
-    const [isLoading, setIsLoading] = useState(false);
-  
-    const generatedUsername = async () => {
-      if (username.trim() === "") return;
-  
-      try {
-        setIsLoading(true);
-  
-        const { error } = await createClient()
-          .from("user_t")
-          .insert({ username });
-          localStorage.setItem("username", username)
-  
-        if (error) {
-          console.log(error.message);
-        }
-        setIsModalOpen(false);
-      } catch (error: any) {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from("user_t")
+        .upsert({ username });
+
+      localStorage.setItem("username", username);
+
+      if (error) {
         console.log(error.message);
-      } finally {
-        setIsLoading(false);
       }
-    };
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.log(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchMessages = async (supabase: any) => {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("room_id", id) 
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching messages:", error.message);
+    } else {
+      setMessages(data || []);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (newMessage.trim() === "") return;
+
+    const supabase = createClient();
+    
+   
+    const { error } = await supabase
+      .from("messages")
+      .insert([{ content: newMessage, sender_name: username, room_id: id }]);
+
+    if (error) {
+      console.error("Error sending message:", error.message);
+    } else {
+      setNewMessage("");
+    }
+  };
+
   return (
-   <div className="h-screen">
-     <div className="chat-container p-4 flex flex-col justify-between">
+    <div className="h-screen">
+      <div className="chat-container p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="p-2 font-black text-lg">{ name }</h2>
+          <h2 className="p-2 font-black text-lg">{name}</h2>
           <div className="dropdown dropdown-end">
             <button
               tabIndex={0}
@@ -97,95 +141,79 @@ function Room({ name }: { name: string }) {
 
         {/* Chat messages */}
         <div className="flex flex-col gap-4 flex-grow overflow-y-auto">
-          <div className="chat chat-start">
-            <div className="chat-image avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  alt="Tailwind CSS chat bubble component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                />
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`chat ${
+                msg.sender_name === username ? "chat-end" : "chat-start"
+              }`}
+            >
+              <div className="chat-header">
+                {msg.sender_name}
+                <time className="text-xs opacity-50">{new Date(msg.created_at).toLocaleTimeString()}</time>
+              </div>
+              <div
+                className={`chat-bubble ${
+                  msg.sender_name === username ? "bg-blue-500" : "bg-gray-300"
+                }`}
+              >
+                {msg.content}
               </div>
             </div>
-            <div className="chat-header">
-              Obi-Wan Kenobi
-              <time className="text-xs opacity-50">12:45</time>
-            </div>
-            <div className="chat-bubble bg-secondary">
-              You were the Chosen One!
-            </div>
-            <div className="chat-footer opacity-50">Delivered</div>
-          </div>
-
-          <div className="chat chat-end">
-            <div className="chat-image avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  alt="Tailwind CSS chat bubble component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                />
-              </div>
-            </div>
-            <div className="chat-header">
-              Anakin
-              <time className="text-xs opacity-50">12:46</time>
-            </div>
-            <div className="chat-bubble bg-accent">I hate you!</div>
-            <div className="chat-footer opacity-50">Seen at 12:46</div>
-          </div>
+          ))}
         </div>
       </div>
+
       <div className="flex items-center border-t border-gray-300 pt-4 px-2 absolute bottom-2 w-full">
         <input
           type="text"
           placeholder="Type your message here"
           className="input input-bordered flex-grow bg-secondary focus:outline-none"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
         />
-        <button className="btn bg-primary ml-2 hover:bg-accent text-white">
+        <button className="btn bg-primary ml-2 hover:bg-accent text-white" onClick={sendMessage}>
           <BiSend />
         </button>
       </div>
 
-      <>
-        {isModalOpen && (
-          <div className="modal modal-open">
-            <div className="modal-box bg-secondary space-y-4 h-[300px]">
-              <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-semibold">
-                  Create a new chatroom
-                </h3>
-                <button
-                  className="btn btn-sm btn-circle flex bg-secondary hover:bg-accent text-white"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  x
-                </button>
-              </div>
-              <div className="flex flex-col">
-                <input
-                  type="text"
-                  placeholder="Enter username"
-                  className="input input-bordered w-full bg-secondary"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setUsername(e.target.value)
-                  }
-                />
-                <button
-                  className="btn mt-6 bg-primary w-full hover:bg-accent text-white"
-                  onClick={generatedUsername}
-                >
-                  {isLoading ? (
-                    <span className="loading loading-spinner loading-md" />
-                  ) : (
-                    "Enter Chat Room"
-                  )}
-                </button>
-              </div>
+      {/* Modal for username input */}
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box bg-secondary space-y-4 h-[300px]">
+            <div className="flex justify-between items-center">
+              <h3 className="text-2xl font-semibold">Enter your username</h3>
+              <button
+                className="btn btn-sm btn-circle flex bg-secondary hover:bg-accent text-white"
+                onClick={() => setIsModalOpen(false)}
+              >
+                x
+              </button>
+            </div>
+            <div className="flex flex-col">
+              <input
+                type="text"
+                placeholder="Enter username"
+                className="input input-bordered w-full bg-secondary"
+                value={username} // Show the current username if there is one
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <button
+                className="btn mt-6 bg-primary w-full hover:bg-accent text-white"
+                onClick={generatedUsername}
+              >
+                {isLoading ? (
+                  <span className="loading loading-spinner loading-md" />
+                ) : (
+                  "Save Username"
+                )}
+              </button>
             </div>
           </div>
-        )}
-      </>
-   </div>
-  )
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default Room
+export default Room;

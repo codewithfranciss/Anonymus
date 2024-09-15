@@ -21,7 +21,7 @@ export default async function Chatroom({
 
   return (
     <div className="relative max-w-2xl mx-auto h-[100dvh]">
-      <Room name={data.name} />
+      <Room name={data.name} id={id}/>
     </div>
   );
 }
