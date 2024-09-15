@@ -162,7 +162,7 @@ function Room({ name, id }: { name: string; id: string }) {
               </div>
               <div
                 className={`chat-bubble ${
-                  msg.sender_name === username ? "bg-blue-500" : "bg-gray-300"
+                  msg.sender_name === username ? "bg-primary" : "bg-secondary"
                 }`}
               >
                 {msg.content}
