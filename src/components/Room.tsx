@@ -8,8 +8,18 @@ import { TbLink } from "react-icons/tb";
 
 function Room({ name }: { name: string }) {
 
-    const [username, setUsername] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(true);
+  const [username, setUsername] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(() => {
+    
+    const existingUser = localStorage.getItem("username")
+    console.log(existingUser)
+    if(!existingUser){
+        return true
+      
+      } else {
+        return false
+      }
+    });
   
     const [isLoading, setIsLoading] = useState(false);
   
@@ -35,8 +45,8 @@ function Room({ name }: { name: string }) {
       }
     };
   return (
-    <>
-      <div className="chat-container p-4 flex flex-col justify-between">
+   <div className="h-screen">
+     <div className="chat-container p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center mb-4">
           <h2 className="p-2 font-black text-lg">{ name }</h2>
           <div className="dropdown dropdown-end">
@@ -174,7 +184,7 @@ function Room({ name }: { name: string }) {
           </div>
         )}
       </>
-    </>
+   </div>
   )
 }
 
