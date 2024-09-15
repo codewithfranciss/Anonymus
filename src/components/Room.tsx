@@ -7,87 +7,41 @@ import { TbLink } from "react-icons/tb";
 
 function Room({ name, id }: { name: string, id: string }) {
   const [username, setUsername] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(true); 
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<any[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("username");
-    if (storedUser) {
-      setUsername(storedUser);
-    }
-
-    const supabase = createClient();
+  const [isModalOpen, setIsModalOpen] = useState(() => {
     
-    // Fetch initial messages
-    fetchMessages(supabase);
-
-    // Poll for new messages
-    const interval = setInterval(() => {
-      fetchMessages(supabase);
-    }, 5000); // Poll every 5 seconds
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [id]);
-
-  const generatedUsername = async () => {
-    if (username.trim() === "") return;
-
-    try {
-      setIsLoading(true);
+    const existingUser = localStorage.getItem("username")
+    console.log(existingUser)
+    if(!existingUser){
+        return true
       
-      const supabase = createClient();
-
-      const { error } = await supabase
-        .from("user_t")
-        .upsert({ username });
-
-      localStorage.setItem("username", username);
-
-      if (error) {
-        console.log(error.message);
+      } else {
+        return false
       }
-      setIsModalOpen(false);
-    } catch (error: any) {
-      console.log(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchMessages = async (supabase: any) => {
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("room_id", id) 
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching messages:", error.message);
-    } else {
-      setMessages(data || []);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (newMessage.trim() === "") return;
-
-    const supabase = createClient();
-    
-   
-    const { error } = await supabase
-      .from("messages")
-      .insert([{ content: newMessage, sender_name: username, room_id: id }]);
-
-    if (error) {
-      console.error("Error sending message:", error.message);
-    } else {
-      setNewMessage("");
-    }
-  };
-
+    });
+  
+    const [isLoading, setIsLoading] = useState(false);
+  
+    const generatedUsername = async () => {
+      if (username.trim() === "") return;
+  
+      try {
+        setIsLoading(true);
+  
+        const { error } = await createClient()
+          .from("user_t")
+          .insert({ username });
+          localStorage.setItem("username", username)
+  
+        if (error) {
+          console.log(error.message);
+        }
+        setIsModalOpen(false);
+      } catch (error: any) {
+        console.log(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
   return (
     <div className="h-screen">
       <div className="chat-container p-4 flex flex-col justify-between">
