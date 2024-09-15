@@ -1,47 +1,99 @@
-'use client'
+"use client";
 
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
 import { BiPencil, BiSend, BiTrash } from "react-icons/bi";
 import { TbLink } from "react-icons/tb";
 
-function Room({ name, id }: { name: string, id: string }) {
-  const [username, setUsername] = useState("");
+function Room({ name, id }: { name: string; id: string }) {
+  const [username, setUsername] = useState(() => {
+    const name = localStorage.getItem("username")
+    if(name){
+      return name
+    } else {
+      return ""
+    }
+  });
   const [isModalOpen, setIsModalOpen] = useState(() => {
-    
-    const existingUser = localStorage.getItem("username")
-    console.log(existingUser)
-    if(!existingUser){
-        return true
-      
-      } else {
-        return false
-      }
-    });
+    const existingUser = localStorage.getItem("username");
+    console.log(existingUser);
+    if (!existingUser) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchMessages = async () => {
+    const { data, error } = await createClient()
+      .from("messages")
+      .select("*")
+      .eq("room_id", id)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching messages:", error.message);
+    } else {
+      setMessages(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages()
+  }, [])
+
+  useEffect(() => { 
+    function realtimeChats() {
+      createClient().channel("messages").on("postgres_changes", { event: "*", schema: "public", table: "messages" }, async (payload) => {
+        console.log(payload)
+        await fetchMessages()
+      }).subscribe()
+    }
+    realtimeChats()
+    }, [])
   
-    const [isLoading, setIsLoading] = useState(false);
-  
-    const generatedUsername = async () => {
-      if (username.trim() === "") return;
-  
-      try {
-        setIsLoading(true);
-  
-        const { error } = await createClient()
-          .from("user_t")
-          .insert({ username });
-          localStorage.setItem("username", username)
-  
-        if (error) {
-          console.log(error.message);
-        }
-        setIsModalOpen(false);
-      } catch (error: any) {
+
+  const generatedUsername = async () => {
+    if (username.trim() === "") return;
+
+    try {
+      setIsLoading(true);
+
+      const { error } = await createClient()
+        .from("user_t")
+        .insert({ username });
+      localStorage.setItem("username", username);
+
+      if (error) {
         console.log(error.message);
-      } finally {
-        setIsLoading(false);
       }
-    };
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.log(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  const sendMessage = async () => {
+    if (newMessage.trim() === "") return;
+
+
+    const { error } = await createClient()
+      .from("messages")
+      .insert([{ content: newMessage, sender_name: username, room_id: id }]);
+
+    if (error) {
+      console.error("Error sending message:", error.message);
+    } else {
+      setNewMessage("");
+    }
+  };
   return (
     <div className="h-screen">
       <div className="chat-container p-4 flex flex-col justify-between">
@@ -104,7 +156,9 @@ function Room({ name, id }: { name: string, id: string }) {
             >
               <div className="chat-header">
                 {msg.sender_name}
-                <time className="text-xs opacity-50">{new Date(msg.created_at).toLocaleTimeString()}</time>
+                <time className="text-xs opacity-50">
+                  {new Date(msg.created_at).toLocaleTimeString()}
+                </time>
               </div>
               <div
                 className={`chat-bubble ${
@@ -126,7 +180,10 @@ function Room({ name, id }: { name: string, id: string }) {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
-        <button className="btn bg-primary ml-2 hover:bg-accent text-white" onClick={sendMessage}>
+        <button
+          className="btn bg-primary ml-2 hover:bg-accent text-white"
+          onClick={sendMessage}
+        >
           <BiSend />
         </button>
       </div>
