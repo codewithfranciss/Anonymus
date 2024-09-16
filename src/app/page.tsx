@@ -49,7 +49,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen justify-center items-center">
       <p className="text-4xl lg:text-5xl xl:text-7xl font-bold" ref={el} />
-
+      <p className="text-xl">Get started today</p>
       <button
         className="btn mt-6 bg-primary hover:bg-accent text-white "
         onClick={() => setIsModalOpen(true)}
@@ -59,7 +59,7 @@ export default function Home() {
       <>
         {isModalOpen && (
           <div className="modal modal-open">
-            <div className="modal-box bg-secondary space-y-4 h-[300px]">
+            <div className="modal-box bg-secondary space-y-4 transition">
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-semibold">
                   Create a new chatroom

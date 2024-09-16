@@ -95,10 +95,10 @@ function Room({ name, id }: { name: string; id: string }) {
     }
   };
   return (
-    <div className="h-screen">
+    <div className="h-full">
       <div className="chat-container p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="p-2 font-black text-lg">{name}</h2>
+          <h2 className="p-2 font-black text-2xl">{name}</h2>
           <div className="dropdown dropdown-end">
             <button
               tabIndex={0}
@@ -191,7 +191,7 @@ function Room({ name, id }: { name: string; id: string }) {
       {/* Modal for username input */}
       {isModalOpen && (
         <div className="modal modal-open">
-          <div className="modal-box bg-secondary space-y-4 h-[300px]">
+          <div className="modal-box bg-secondary space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-semibold">Enter your username</h3>
               <button
