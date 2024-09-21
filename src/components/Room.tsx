@@ -12,7 +12,16 @@ function Room({ name, id }: { name: string; id: string }) {
     return name || "";
   });
 
-  const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(true); // Username modal
+  const [isModalOpen, setIsModalOpen] = useState(() => {
+    const existingUser = localStorage.getItem("username");
+    console.log(existingUser);
+    if (!existingUser) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false); // Rename modal
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -68,7 +77,7 @@ function Room({ name, id }: { name: string; id: string }) {
       if (error) {
         console.log(error.message);
       }
-      setIsUsernameModalOpen(false); // Close username modal after saving
+      setIsModalOpen(false); // Close username modal after saving
     } catch (error: any) {
       console.log(error.message);
     } finally {
@@ -92,7 +101,6 @@ function Room({ name, id }: { name: string; id: string }) {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert("Room link copied to clipboard!");
   };
 
   const handleRename = async () => {
@@ -106,9 +114,8 @@ function Room({ name, id }: { name: string; id: string }) {
 
       if (error) {
         console.error("Error renaming room:", error.message);
-      } else {
-        alert("Room name updated successfully!");
       }
+      setIsRenameModalOpen(false);
     } catch (error: any) {
       console.error(error.message);
     }
@@ -154,12 +161,6 @@ function Room({ name, id }: { name: string; id: string }) {
                 Rename
               </a>
             </li>
-            <li>
-              <a>
-                <BiTrash />
-                Delete
-              </a>
-            </li>
           </ul>
         </div>
       </div>
@@ -168,30 +169,41 @@ function Room({ name, id }: { name: string; id: string }) {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`chat ${msg.sender_name === username ? "chat-end" : "chat-start"}`}
+            className={`chat flex flex-col gap-2 ${
+              msg.sender_name === username ? "chat-end" : "chat-start"
+            }`}
           >
             <div className="chat-header">
               {msg.sender_name}
-              <time className="text-xs opacity-50">
-                {new Date(msg.created_at).toLocaleTimeString()}
-              </time>
+           
             </div>
             <div
-              className={`chat-bubble ${msg.sender_name === username ? "bg-primary" : "bg-secondary"}`}
+              className={`chat-bubble text-white ${
+                msg.sender_name === username ? "bg-primary" : "bg-secondary"
+              }`}
             >
               {msg.content}
+       
             </div>
+            <time className="text-xs opacity-50">
+                {new Date(msg.created_at).toLocaleTimeString()}
+              </time>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center pt-4 px-4 fixed bottom-0 w-full max-w-3xl mx-auto z-50 left-0 right-0">
+      <div className="flex items-center pt-4 px-4 fixed bottom-4 w-full max-w-3xl mx-auto z-50 left-0 right-0">
         <input
           type="text"
           placeholder="Type your message here"
           className="input input-bordered mb-1 flex-grow bg-secondary focus:outline-none"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
         />
         <button
           className="btn bg-primary ml-2 hover:bg-accent text-white"
@@ -202,14 +214,14 @@ function Room({ name, id }: { name: string; id: string }) {
       </div>
 
       {/* Username Modal */}
-      {isUsernameModalOpen && (
+      {isModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box bg-secondary space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-semibold">Enter your username</h3>
               <button
                 className="btn btn-sm btn-circle flex bg-secondary hover:bg-accent text-white"
-                onClick={() => setIsUsernameModalOpen(false)}
+                onClick={() => setIsModalOpen(false)}
               >
                 x
               </button>

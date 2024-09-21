@@ -79,6 +79,7 @@ export default function Home() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setRoomName(e.target.value)
                   }
+                  
                 />
                 <button
                   className="btn mt-6 bg-primary w-full hover:bg-accent text-white"
