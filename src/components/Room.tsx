@@ -207,6 +207,7 @@ function Room({ name, id }: { name: string; id: string }) {
           placeholder="Type your message here"
           className="input input-bordered mb-1 flex-grow bg-secondary focus:outline-none"
           value={newMessage}
+          maxLength={300}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
