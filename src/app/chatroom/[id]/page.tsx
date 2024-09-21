@@ -15,11 +15,7 @@ export default async function Chatroom({
     console.log(error);
   }
 
-  const isExpired = new Date(data.expires).getTime() <= new Date().getTime()
 
-  if (isExpired) {
-    redirect("/expired");
-  }
 
   if(!data){
     redirect("/invalid")
