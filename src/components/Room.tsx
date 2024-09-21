@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BiPencil, BiSend, BiTrash } from "react-icons/bi";
 import { TbLink } from "react-icons/tb";
 
@@ -121,6 +121,14 @@ function Room({ name, id }: { name: string; id: string }) {
     }
   };
 
+  const bottomRef = useRef<HTMLSpanElement | null>(null)
+
+  useEffect(() => {
+    if(bottomRef.current){
+      bottomRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [messages])
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4 p-4">
@@ -190,6 +198,7 @@ function Room({ name, id }: { name: string; id: string }) {
               </time>
           </div>
         ))}
+        <span ref={bottomRef}/>
       </div>
 
       <div className="flex items-center pt-4 px-4 fixed bottom-4 w-full max-w-3xl mx-auto z-50 left-0 right-0">

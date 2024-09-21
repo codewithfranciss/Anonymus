@@ -49,7 +49,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen justify-center items-center">
       <p className="text-3xl lg:text-5xl xl:text-7xl font-bold" ref={el} />
-      <p className="text-lg">Chatting in secret</p>
+      <p className="text-2xl">Chatting in secret</p>
       <button
         className="btn mt-6 bg-primary hover:bg-accent text-white "
         onClick={() => setIsModalOpen(true)}
