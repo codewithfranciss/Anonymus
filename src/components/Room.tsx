@@ -223,42 +223,6 @@ function Room({ name, id }: { name: string; id: string }) {
         </button>
       </div>
 
-      {/* Username Modal */}
-      {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box bg-secondary space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-semibold">Enter your username</h3>
-              <button
-                className="btn btn-sm btn-circle flex bg-secondary hover:bg-accent text-white"
-                onClick={() => setIsModalOpen(false)}
-              >
-                x
-              </button>
-            </div>
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Enter username"
-                className="input input-bordered w-full bg-secondary"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <button
-                className="btn mt-6 bg-primary w-full hover:bg-accent text-white"
-                onClick={generatedUsername}
-              >
-                {isLoading ? (
-                  <span className="loading loading-spinner loading-md" />
-                ) : (
-                  "Save Username"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Rename Modal */}
       {isRenameModalOpen && (
         <div className="modal modal-open">

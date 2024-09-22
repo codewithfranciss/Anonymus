@@ -1,4 +1,5 @@
 "use client";
+import { alphabets } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +15,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
   const el = useRef<HTMLParagraphElement | null>(null);
+  
   useEffect(() => {
     const typed = new Typed(el.current, {
       strings: ["Welcome To Anonymous"],
@@ -34,6 +36,22 @@ export default function Home() {
 
       const link = `https://anonymus-chi.vercel.app/chatroom/${id}`;
       setGeneratedLink(link);
+
+      const name = []
+
+      for(let i = 0; i < 5; i++){
+        const randomLetter = alphabets[Math.floor(Math.random() * alphabets.length)]
+        name.push(randomLetter)
+      }
+
+      const username = name.join("")
+      const { error } = await createClient()
+      .from("user_t")
+      .insert({ username });
+      if (error) {
+        console.error("Error renaming room:", error.message);
+      }
+    localStorage.setItem("username", username);
     } catch (error: any) {
       console.log(error.message);
     } finally {
@@ -79,6 +97,7 @@ export default function Home() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setRoomName(e.target.value)
                   }
+                  maxLength={50}
                   
                 />
                 <button
